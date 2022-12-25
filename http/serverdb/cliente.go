@@ -19,6 +19,8 @@ type Usuario struct {
 	Nome string `json:"nome"`
 }
 
+var connectionString = "root:123456@/cursogo"
+
 // UsuarioHandler analisa o request e delega para função adequada
 func UsuarioHandler(w http.ResponseWriter, r *http.Request) {
 	sid := strings.TrimPrefix(r.URL.Path, "/usuarios/")
@@ -43,7 +45,7 @@ func UsuarioHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func usuarioPorID(w http.ResponseWriter, r *http.Request, id int) {
-	db, err := sql.Open("mysql", "root:123456@/cursogo")
+	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,14 +54,21 @@ func usuarioPorID(w http.ResponseWriter, r *http.Request, id int) {
 	var u Usuario
 	db.QueryRow("select id, nome from usuarios where id = ?", id).Scan(&u.ID, &u.Nome)
 
-	json, _ := json.Marshal(u)
+	if u.ID > 0 {
+		json, _ := json.Marshal(u)
 
-	w.Header().Set("Content-Type", "application/json")
-	fmt.Fprint(w, string(json))
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Fprint(w, string(json))
+	} else {
+		w.WriteHeader(401)
+		fmt.Printf("client: doesn't exist user 401")
+
+	}
+
 }
 
 func usuarioTodos(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:123456@/cursogo")
+	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -82,7 +91,7 @@ func usuarioTodos(w http.ResponseWriter, r *http.Request) {
 }
 
 func usuarioInsert(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:123456@/cursogo")
+	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -130,7 +139,7 @@ func usuarioInsert(w http.ResponseWriter, r *http.Request) {
 }
 
 func usuarioUpdate(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:123456@/cursogo")
+	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -178,7 +187,7 @@ func usuarioUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func usuarioDeleteProc(w http.ResponseWriter, r *http.Request) {
-	db, err := sql.Open("mysql", "root:123456@/cursogo")
+	db, err := sql.Open("mysql", connectionString)
 	if err != nil {
 		log.Fatal(err)
 	}
